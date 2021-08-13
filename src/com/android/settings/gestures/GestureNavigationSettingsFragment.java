@@ -17,6 +17,7 @@
 package com.android.settings.gestures;
 
 import android.app.settings.SettingsEnums;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -45,6 +46,7 @@ public class GestureNavigationSettingsFragment extends DashboardFragment {
     private static final String LEFT_EDGE_SEEKBAR_KEY = "gesture_left_back_sensitivity";
     private static final String RIGHT_EDGE_SEEKBAR_KEY = "gesture_right_back_sensitivity";
     private static final String KEY_BACK_HEIGHT = "gesture_back_height";
+    private static final String GESTURE_NAVBAR_LENGTH_KEY = "gesture_navbar_length_preference";
 
     private WindowManager mWindowManager;
     private BackGestureIndicatorView mIndicatorView;
@@ -54,6 +56,10 @@ public class GestureNavigationSettingsFragment extends DashboardFragment {
     private float[] mBackGestureHeightScales = { 0f, 1f, 2f, 3f };
     private int mCurrentRightWidth;
     private int mCurrentLefttWidth;
+
+    private IOverlayManager mOverlayManager;
+
+    private LabeledSeekBarPreference mGestureNavbarLengthPreference;
 
     public GestureNavigationSettingsFragment() {
         super();
@@ -80,6 +86,8 @@ public class GestureNavigationSettingsFragment extends DashboardFragment {
         initSeekBarPreference(LEFT_EDGE_SEEKBAR_KEY);
         initSeekBarPreference(RIGHT_EDGE_SEEKBAR_KEY);
         initSeekBarPreference(KEY_BACK_HEIGHT);
+        initGestureNavbarLengthPreference();
+        initFullscreenGesturePreference();
     }
 
     @Override
@@ -206,6 +214,37 @@ public class GestureNavigationSettingsFragment extends DashboardFragment {
             }
             return true;
         });
+    }
+
+    private void initFullscreenGesturePreference() {
+        findPreference(FULLSCREEN_GESTURE_PREF_KEY)
+            .setOnPreferenceChangeListener((pref, newValue) -> {
+                final boolean isChecked = (boolean) newValue;
+                mGestureNavbarLengthPreference.setEnabled(!isChecked);
+                try {
+                    mOverlayManager.setEnabledExclusiveInCategory(
+                        isChecked ? FULLSCREEN_GESTURE_OVERLAY_PKG : NAV_BAR_MODE_GESTURAL_OVERLAY,
+                        UserHandle.USER_CURRENT);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while setting fullscreen gesture overlay");
+                }
+                return true;
+            });
+    }
+
+    private void initGestureNavbarLengthPreference() {
+        final ContentResolver resolver = getContext().getContentResolver();
+        mGestureNavbarLengthPreference = getPreferenceScreen().findPreference(GESTURE_NAVBAR_LENGTH_KEY);
+        mGestureNavbarLengthPreference.setEnabled(Settings.System.getIntForUser(
+            resolver, Settings.System.FULLSCREEN_GESTURES,
+            0, UserHandle.USER_CURRENT) == 0);
+        mGestureNavbarLengthPreference.setContinuousUpdates(true);
+        mGestureNavbarLengthPreference.setProgress(Settings.Secure.getIntForUser(
+            resolver, Settings.Secure.GESTURE_NAVBAR_LENGTH_MODE,
+            0, UserHandle.USER_CURRENT));
+        mGestureNavbarLengthPreference.setOnPreferenceChangeListener((p, v) ->
+            Settings.Secure.putIntForUser(resolver, Settings.Secure.GESTURE_NAVBAR_LENGTH_MODE,
+                (Integer) v, UserHandle.USER_CURRENT));
     }
 
     private static float[] getFloatArray(TypedArray array) {
