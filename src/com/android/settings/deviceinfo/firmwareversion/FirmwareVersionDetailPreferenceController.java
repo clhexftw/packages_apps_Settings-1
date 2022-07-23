@@ -39,7 +39,7 @@ import com.android.settingslib.RestrictedLockUtilsInternal;
 public class FirmwareVersionDetailPreferenceController extends BasePreferenceController {
 
     @VisibleForTesting
-    private static final String XD_PLATFORM_RELEASE_OR_CODENAME = "ro.voidui.settings.android_version";
+    private static final String XD_PLATFORM_RELEASE_OR_CODENAME = "ro.eternity.settings.android_version";
 
     private static final String TAG = "firmwareDialogCtrl";
     private static final int DELAY_TIMER_MILLIS = 500;
