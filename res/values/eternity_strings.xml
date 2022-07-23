@@ -24,4 +24,6 @@
     <!-- Eternity Maintainer -->
     <string name="Eternity_maintainer">Device Maintainer</string>
 
+    <!-- Eternity version preference -->
+    <string name="Eternity_version">"Eternity version"</string>
 </resources>
