@@ -21,4 +21,7 @@
      <string name="selinux_status_permissive">Permissive</string>
      <string name="selinux_status_enforcing">Enforcing</string>
 
+    <!-- Eternity Maintainer -->
+    <string name="Eternity_maintainer">Device Maintainer</string>
+
 </resources>
